@@ -4,19 +4,35 @@ from app.services.ai_service import ask_ollama
 def analyze_cv_match(cv_text, job_description):
 
     prompt = f"""
-You are an ATS resume analyzer.
+You are a professional ATS resume analyzer.
 
-Analyze this resume against the job description.
+Analyze the resume against the job description.
 
-Return:
-1. Match percentage
-2. Missing skills
-3. Strengths
-4. Weaknesses
-5. Suggestions to improve the resume
+Respond ONLY in this format:
+
+MATCH_SCORE:
+(number from 0 to 100)
+
+MISSING_SKILLS:
+- skill 1
+- skill 2
+
+STRENGTHS:
+- strength 1
+- strength 2
+
+WEAKNESSES:
+- weakness 1
+- weakness 2
+
+SUGGESTIONS:
+- suggestion 1
+- suggestion 2
+
 
 RESUME:
 {cv_text}
+
 
 JOB DESCRIPTION:
 {job_description}
