@@ -1,83 +1,115 @@
-from fastapi import APIRouter, UploadFile, File, BackgroundTasks
-from fastapi.responses import FileResponse
+from fastapi import (
+    APIRouter,
+    UploadFile,
+    File,
+    Form
+)
 
-import os
+from fastapi.responses import StreamingResponse
 import tempfile
-
+import os
 from app.services.cv_parser import extract_text_from_pdf
-from app.services.ai_service import improve_cv
-from app.services.pdf_service import generate_pdf
+from app.services.ats_service import (
+    analyze_cv_match
+)
+from app.services.cv_generator_service import (
+    generate_optimized_cv,
+    create_pdf
+)
 
 router = APIRouter()
 
 
 def delete_file(path: str):
+
     if os.path.exists(path):
         os.remove(path)
 
 
-@router.post("/upload-cv")
-async def upload_cv(
-    background_tasks: BackgroundTasks,
-    file: UploadFile = File(...)
+# =====================================
+# ANALYZE CV VS JOB OFFER
+# =====================================
+
+@router.post("/analyze-match")
+async def analyze_match(
+    file: UploadFile = File(...),
+    job_description: str = Form(...)
 ):
 
-    # =========================
-    # Crear archivo temporal input
-    # =========================
-
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_input:
+    with tempfile.NamedTemporaryFile(
+        delete=False,
+        suffix=".pdf"
+    ) as temp_file:
 
         content = await file.read()
-        temp_input.write(content)
+        temp_file.write(content)
 
-        input_path = temp_input.name
+        temp_path = temp_file.name
 
     try:
 
-        # =========================
-        # Extraer texto
-        # =========================
-
-        text = extract_text_from_pdf(input_path)
-
-        # =========================
-        # Mejorar CV con IA
-        # =========================
-
-        improved_cv = improve_cv(text)
-
-        # =========================
-        # Crear PDF temporal output
-        # =========================
-
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_output:
-
-            output_path = temp_output.name
-
-        # Generar PDF
-        generate_pdf(improved_cv, output_path)
-
-        # =========================
-        # Eliminar archivos luego
-        # =========================
-
-        background_tasks.add_task(delete_file, input_path)
-        background_tasks.add_task(delete_file, output_path)
-
-        # =========================
-        # Retornar PDF
-        # =========================
-
-        return FileResponse(
-            output_path,
-            media_type="application/pdf",
-            filename=f"improved_{file.filename}"
+        cv_text = extract_text_from_pdf(
+            temp_path
         )
 
-    except Exception as e:
+        analysis = analyze_cv_match(
+            cv_text,
+            job_description
+        )
 
-        # limpiar input si ocurre error
-        delete_file(input_path)
+        return {
+            "analysis": analysis
+        }
 
-        return {"error": str(e)}
+    finally:
+
+        delete_file(temp_path)
+
+
+# =====================================
+# GENERATE OPTIMIZED CV
+# =====================================
+
+@router.post("/generate-cv")
+async def generate_cv(
+    file: UploadFile = File(...),
+    job_description: str = Form(...)
+):
+
+    with tempfile.NamedTemporaryFile(
+        delete=False,
+        suffix=".pdf"
+    ) as temp_file:
+
+        content = await file.read()
+        temp_file.write(content)
+
+        temp_path = temp_file.name
+
+    try:
+
+        cv_text = extract_text_from_pdf(
+            temp_path
+        )
+
+        optimized_cv = generate_optimized_cv(
+            cv_text,
+            job_description
+        )
+
+        pdf_buffer = create_pdf(
+            optimized_cv
+        )
+
+        return StreamingResponse(
+            pdf_buffer,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition":
+                "attachment; filename=optimized_cv.pdf"
+            }
+        )
+
+    finally:
+
+        delete_file(temp_path)
