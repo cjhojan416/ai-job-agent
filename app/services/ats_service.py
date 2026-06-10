@@ -10,8 +10,7 @@ Analyze the resume against the job description.
 
 Respond ONLY in this format:
 
-MATCH_SCORE:
-(number from 0 to 100)
+
 
 MISSING_SKILLS:
 - skill 1
