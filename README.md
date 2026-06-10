@@ -53,7 +53,7 @@ Crear archivo `.env`
 ## Ejecutar servidor
 
 ```bash
-uvicorn app.main:app --reload
+python -m uvicorn main:app --reload
 ```
 
 Servidor disponible en:
