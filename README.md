@@ -2,6 +2,12 @@
 
 Backend desarrollado con FastAPI para el procesamiento de currículums y análisis ATS mediante Inteligencia Artificial.
 
+Clonar el repositorio:
+
+```bash
+git clone https://github.com/cjhojan416/ai-job-agent
+```
+
 ## Tecnologías
 
 * Python
