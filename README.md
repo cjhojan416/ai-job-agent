@@ -14,7 +14,7 @@ git clone https://github.com/cjhojan416/ai-job-agent
 * FastAPI
 * Uvicorn
 * pdfplumber
-* Ollama 
+* OpenRouter
 * ReportLab
 
 ## Instalación

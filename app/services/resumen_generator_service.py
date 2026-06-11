@@ -1,4 +1,4 @@
-from app.services.ai_service import ask_ollama
+from app.services.ai_service import ask_ai
 
 
 def generate_optimized_resume(
@@ -30,6 +30,6 @@ JOB DESCRIPTION:
 {job_description}
 """
 
-    response = ask_ollama(prompt)
+    response = ask_ai(prompt)
 
     return response

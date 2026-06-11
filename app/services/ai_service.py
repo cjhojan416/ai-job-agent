@@ -1,45 +1,29 @@
-import requests
+import os
+from openai import OpenAI
+from dotenv import load_dotenv
 
-OLLAMA_URL = "http://localhost:11434/api/generate"
+load_dotenv()
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.getenv("OPENROUTER_API_KEY")
+)
 
 
-def ask_ollama(prompt):
+def ask_ai(prompt):
 
-    response = requests.post(
-        OLLAMA_URL,
-        json={
-            "model": "phi3",
-            "prompt": prompt,
-            "stream": False
-        }
+    response = client.chat.completions.create(
+        model="nex-agi/nex-n2-pro:free",
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
     )
 
-    return response.json()["response"]
+    return response.choices[0].message.content
 
 
-def improve_cv(cv_text):
 
-    prompt = f"""
-    Analiza y mejora este CV.
 
-    REGLAS ESTRICTAS:
-
-    - NO cambies el nombre de la persona
-    - NO traduzcas el CV
-    - MANTÉN el idioma original
-    - MANTÉN toda la información personal exactamente igual
-    - NO modifiques correos electrónicos
-    - NO modifiques teléfonos
-    - NO inventes información
-    - NO cambies empresas
-    - NO cambies tecnologías
-    - SOLO mejora redacción y estructura
-    - Optimizado para ATS
-    - Formato profesional
-
-    CV:
-    {cv_text}
-    """
-
-    return ask_ollama(prompt)
-
+    

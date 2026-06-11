@@ -1,10 +1,12 @@
 from fastapi import FastAPI
 from app.routes.cv_routes import router as cv_router
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes.cv_routes import router as cv_router
+from dotenv import load_dotenv
+import os
 
-
+load_dotenv()
 app = FastAPI()
+print("OPENROUTER:", os.getenv("OPENROUTER_API_KEY"))
 
 app.add_middleware(
     CORSMiddleware,
