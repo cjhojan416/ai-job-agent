@@ -4,7 +4,6 @@ from fastapi import (
     File,
     Form
 )
-
 from fastapi.responses import StreamingResponse
 import tempfile
 import os
@@ -16,7 +15,6 @@ from app.services.cv_generator_service import (
     generate_optimized_cv,
     create_pdf
 )
-
 router = APIRouter()
 
 
